@@ -13,8 +13,14 @@ func main() {
 	for i := uint(0); i <= 1; i++ {
 		for j := uint(0); j <= 1; j++ {
 			for k := uint(0); k <= 1; k++ {
-				fmt.Printf("T[%d,%d,%d] : %f\n", i, j, k, t.Get(i, j, k))
+				fmt.Printf("T[%d,%d,%d] : %f\n", i, j, k, t.Get([]uint{i, j, k}))
 			}
 		}
 	}
+
+	indices := [][]uint{
+		[]uint{0, 1, 1},
+		[]uint{0, 0, 0}}
+
+	fmt.Println(t.GetList(indices))
 }
