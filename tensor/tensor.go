@@ -1,8 +1,6 @@
 package tensor
 
 import (
-	"fmt"
-
 	"github.com/fr4nt1x/linAlg/mathutils"
 )
 
@@ -30,19 +28,6 @@ func New(entries []float64, shape ...uint) Struct {
 	newShape := processShape(shape)
 	t := Struct{newShape, entries}
 	return t
-}
-
-func processShape(shape []uint) []uint {
-	var newShape []uint
-	for _, i := range shape {
-		if i != 1 {
-			newShape = append(newShape, i)
-		}
-	}
-	if len(newShape) == 0 {
-		newShape = append(newShape, 1)
-	}
-	return newShape
 }
 
 //Get returns the value of the given index
@@ -87,16 +72,5 @@ func (inputTensor Struct) SetList(indicesList [][]uint, values []float64) {
 	for i, indices := range indicesList {
 		checkIndicesInRange(inputTensor, indices)
 		inputTensor.Set(indices, values[i])
-	}
-}
-
-func checkIndicesInRange(inputTensor Struct, indices []uint) {
-	if len(indices) != len(inputTensor.shape) {
-		panic("Not enough indices given for tensor.")
-	}
-	for i, index := range indices {
-		if index > inputTensor.shape[i]-1 {
-			panic(fmt.Sprintf("Index %d out of bounds: %d", i, index))
-		}
 	}
 }
