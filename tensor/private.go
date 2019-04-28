@@ -1,6 +1,10 @@
 package tensor
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/fr4nt1x/linAlg/mathutils"
+)
 
 func processShape(shape []uint) []uint {
 	var newShape []uint
@@ -24,4 +28,15 @@ func checkIndicesInRange(inputTensor Struct, indices []uint) {
 			panic(fmt.Sprintf("Index %d out of bounds: %d", i, index))
 		}
 	}
+}
+
+func getIndicesFromVectorizedIndex(inputShape []uint, vectorizedIndex uint) []uint {
+	lastIndex := len(inputShape) - 1
+	indices := make([]uint, len(inputShape))
+
+	for i := 0; i < len(inputShape); i++ {
+		indices[lastIndex-i] = mathutils.Prod(inputShape[0 : lastIndex-i])
+	}
+
+	return indices
 }
