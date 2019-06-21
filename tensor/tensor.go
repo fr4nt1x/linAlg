@@ -86,8 +86,11 @@ func (inputTensor *Struct) GetShape() []uint {
 func (inputTensor *Struct) Dot(secondInputTensor *Tensor, firstAxis uint, secondAxis uint) Tensor {
 	firstShape := inputTensor.GetShape()
 	secondShape := (*secondInputTensor).GetShape()
+	var axisLength uint
 	if firstShape[firstAxis] != secondShape[secondAxis] {
 		panic("The given Axes cannot be used for contraction.")
+	} else {
+		axisLength = firstShape[firstAxis]
 	}
 
 	newShapeLength := len(firstShape) + len(secondShape) - 2
@@ -103,16 +106,39 @@ func (inputTensor *Struct) Dot(secondInputTensor *Tensor, firstAxis uint, second
 	}
 
 	for i := uint(0); i < uint(len(secondShape)); i++ {
-		if i == firstAxis {
+		if i == secondAxis {
 			continue
 		} else {
 			newShape[newIndex] = secondShape[i]
 			newIndex++
 		}
 	}
-	resultTensor := New(make([]float64, mathutils.Prod(newShape)), newShape...)
-	for i := 0; i < newShapeLength; i++ {
 
+	resultTensorLength := mathutils.Prod(newShape)
+	resultTensor := New(make([]float64, resultTensorLength), newShape...)
+	var indicesList []uint
+
+	for i := uint(0); i < resultTensorLength; i++ {
+		indicesList = getIndicesFromVectorizedIndex(newShape, i)
+		indicesFirstTensor := make([]uint, len(firstShape)-1)
+		indicesSecondTensor := make([]uint, len(secondShape)-1)
+		copy(indicesFirstTensor, indicesList[0:len(firstShape)-1])
+		copy(indicesSecondTensor, indicesList[len(firstShape)-1:])
+
+		/*Prepare insertion of indices*/
+		indicesFirstTensor = append(indicesFirstTensor, 0 /* use the zero value of the element type */)
+		copy(indicesFirstTensor[firstAxis+1:], indicesFirstTensor[firstAxis:])
+
+		indicesSecondTensor = append(indicesSecondTensor, 0 /* use the zero value of the element type */)
+		copy(indicesSecondTensor[secondAxis+1:], indicesSecondTensor[secondAxis:])
+
+		newValue := float64(0)
+		for sumIndex := uint(0); sumIndex < axisLength; sumIndex++ {
+			indicesFirstTensor[firstAxis] = sumIndex
+			indicesSecondTensor[secondAxis] = sumIndex
+			newValue += inputTensor.Get(indicesFirstTensor) * (*secondInputTensor).Get(indicesSecondTensor)
+		}
+		resultTensor.Set(indicesList, newValue)
 	}
 	return resultTensor
 }

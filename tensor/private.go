@@ -33,9 +33,10 @@ func checkIndicesInRange(inputTensor Struct, indices []uint) {
 func getIndicesFromVectorizedIndex(inputShape []uint, vectorizedIndex uint) []uint {
 	lastIndex := len(inputShape) - 1
 	indices := make([]uint, len(inputShape))
-
-	for i := 0; i < len(inputShape); i++ {
-		indices[lastIndex-i] = mathutils.Prod(inputShape[0 : lastIndex-i])
+	/*TODO Not working right now*/
+	for i := 0; i < len(inputShape)-1; i++ {
+		indices[lastIndex-i] = mathutils.Prod(inputShape[0:lastIndex-i]) % vectorizedIndex
+		vectorizedIndex -= indices[lastIndex-i]
 	}
 
 	return indices
